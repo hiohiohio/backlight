@@ -62,7 +62,6 @@ def calc_trade_performance(
         Metrics of trades and positions.
     """
     total_count, win_count, lose_count, trade_pls = count_trades(trades, mkt)
-    positions = backlight.positions.calc_positions(trades, mkt, principal=principal)
 
     m = pd.DataFrame.from_records(
         [
@@ -72,12 +71,12 @@ def calc_trade_performance(
             ("win_ratio", _divide(win_count, total_count)),
             ("lose_ratio", _divide(lose_count, total_count)),
             ("trade_pls", trade_pls),
-            ("positions", positions)
         ]
     ).set_index(0)
     del m.index.name
     m.columns = ["metrics"]
 
+    positions = backlight.positions.calc_positions(trades, mkt, principal=principal)
     m = pd.concat([m.T, calc_position_performance(positions)], axis=1)
 
     m.loc[:, "avg_win_pl"] = _divide(
