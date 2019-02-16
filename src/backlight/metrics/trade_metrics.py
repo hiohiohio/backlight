@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
-from typing import Tuple
+from typing import Tuple, List
 
 import backlight.positions
 from backlight.datasource.marketdata import MarketData
@@ -25,7 +25,7 @@ def _calc_pl(trade: pd.Series, mkt: MarketData) -> float:
     return _sum(pl)
 
 
-def count_trades(trades: Trades, mkt: MarketData) -> Tuple[int, int, int]:
+def count_trades(trades: Trades, mkt: MarketData) -> Tuple[int, int, int, List[float]]:
     """Count winning, losing and total number of trades.
 
     Args:
@@ -45,7 +45,7 @@ def count_trades(trades: Trades, mkt: MarketData) -> Tuple[int, int, int]:
     total = len(trades.ids)
     win = sum([pl > 0.0 for pl in pls])
     lose = sum([pl < 0.0 for pl in pls])
-    return total, win, lose
+    return total, win, lose, pls
 
 
 def calc_trade_performance(
@@ -61,7 +61,8 @@ def calc_trade_performance(
     Returns:
         Metrics of trades and positions.
     """
-    total_count, win_count, lose_count = count_trades(trades, mkt)
+    total_count, win_count, lose_count, trade_pls = count_trades(trades, mkt)
+    positions = backlight.positions.calc_positions(trades, mkt, principal=principal)
 
     m = pd.DataFrame.from_records(
         [
@@ -70,12 +71,13 @@ def calc_trade_performance(
             ("cnt_lose", lose_count),
             ("win_ratio", _divide(win_count, total_count)),
             ("lose_ratio", _divide(lose_count, total_count)),
+            ("trade_pls", pls),
+            ("positions", positions)
         ]
     ).set_index(0)
     del m.index.name
     m.columns = ["metrics"]
 
-    positions = backlight.positions.calc_positions(trades, mkt, principal=principal)
     m = pd.concat([m.T, calc_position_performance(positions)], axis=1)
 
     m.loc[:, "avg_win_pl"] = _divide(
