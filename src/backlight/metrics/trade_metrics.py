@@ -70,7 +70,6 @@ def calc_trade_performance(
             ("cnt_lose", lose_count),
             ("win_ratio", _divide(win_count, total_count)),
             ("lose_ratio", _divide(lose_count, total_count)),
-            ("trade_pls", trade_pls),
         ]
     ).set_index(0)
     del m.index.name
@@ -88,5 +87,7 @@ def calc_trade_performance(
     m.loc[:, "avg_pl_per_trade"] = _divide(
         m.loc["metrics", "total_pl"], m.loc["metrics", "cnt_trade"]
     )
+
+    m.loc[:, "trade_pls"] = trade_pls
 
     return m
