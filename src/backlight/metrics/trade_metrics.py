@@ -71,7 +71,7 @@ def calc_trade_performance(
             ("cnt_lose", lose_count),
             ("win_ratio", _divide(win_count, total_count)),
             ("lose_ratio", _divide(lose_count, total_count)),
-            ("trade_pls", pls),
+            ("trade_pls", trade_pls),
             ("positions", positions)
         ]
     ).set_index(0)
